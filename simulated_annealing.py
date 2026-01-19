@@ -72,7 +72,8 @@ class LineupOptimizer:
         
         # Cost component 3: Experience balance
         # Prefer mixing novice and varsity rather than clustering
-        varsity_count = sum(1 for r in lineup if r.experience.value == "varsity")
+        from rower import Experience
+        varsity_count = sum(1 for r in lineup if r.experience == Experience.VARSITY)
         # Ideal is balanced, so penalize extremes
         experience_imbalance = abs(varsity_count - len(lineup) / 2)
         cost += experience_imbalance * 10.0

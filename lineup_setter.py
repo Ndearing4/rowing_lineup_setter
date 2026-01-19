@@ -43,16 +43,20 @@ def print_lineup_details(boat, cost: float):
     print("-"*60)
     
     lineup = boat.get_lineup()
+    active_rowers = [r for r in lineup if r]
     
     # Average erg score
-    avg_erg = sum(r.erg_score for r in lineup if r) / len(lineup)
-    minutes = int(avg_erg // 60)
-    seconds = avg_erg % 60
-    print(f"Average Erg Score: {minutes}:{seconds:05.2f}")
+    if active_rowers:
+        avg_erg = sum(r.erg_score for r in active_rowers) / len(active_rowers)
+        minutes = int(avg_erg // 60)
+        seconds = avg_erg % 60
+        print(f"Average Erg Score: {minutes}:{seconds:05.2f}")
     
-    # Average attendance
-    avg_attendance = sum(r.attendance for r in lineup if r) / len(lineup)
-    print(f"Average Attendance: {avg_attendance:.1%}")
+        # Average attendance
+        avg_attendance = sum(r.attendance for r in active_rowers) / len(active_rowers)
+        print(f"Average Attendance: {avg_attendance:.1%}")
+    else:
+        print("No rowers in lineup")
     
     # Experience breakdown
     varsity_count = sum(1 for r in lineup if r and r.experience == Experience.VARSITY)
