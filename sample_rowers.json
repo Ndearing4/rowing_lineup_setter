@@ -1,0 +1,88 @@
+{
+  "rowers": [
+    {
+      "name": "Alice Johnson",
+      "erg_score": 420.5,
+      "side_preference": "port",
+      "experience": "varsity",
+      "attendance": 0.95
+    },
+    {
+      "name": "Bob Smith",
+      "erg_score": 425.2,
+      "side_preference": "starboard",
+      "experience": "varsity",
+      "attendance": 0.92
+    },
+    {
+      "name": "Charlie Davis",
+      "erg_score": 430.8,
+      "side_preference": "both",
+      "experience": "varsity",
+      "attendance": 0.98
+    },
+    {
+      "name": "Diana Martinez",
+      "erg_score": 435.0,
+      "side_preference": "port",
+      "experience": "varsity",
+      "attendance": 0.90
+    },
+    {
+      "name": "Ethan Wilson",
+      "erg_score": 440.5,
+      "side_preference": "starboard",
+      "experience": "novice",
+      "attendance": 0.88
+    },
+    {
+      "name": "Fiona Brown",
+      "erg_score": 445.0,
+      "side_preference": "port",
+      "experience": "novice",
+      "attendance": 0.93
+    },
+    {
+      "name": "George Taylor",
+      "erg_score": 450.2,
+      "side_preference": "both",
+      "experience": "novice",
+      "attendance": 0.85
+    },
+    {
+      "name": "Hannah Lee",
+      "erg_score": 455.8,
+      "side_preference": "starboard",
+      "experience": "novice",
+      "attendance": 0.91
+    },
+    {
+      "name": "Ian Cooper",
+      "erg_score": 428.0,
+      "side_preference": "port",
+      "experience": "varsity",
+      "attendance": 0.96
+    },
+    {
+      "name": "Julia Anderson",
+      "erg_score": 438.5,
+      "side_preference": "starboard",
+      "experience": "varsity",
+      "attendance": 0.94
+    },
+    {
+      "name": "Kevin White",
+      "erg_score": 448.0,
+      "side_preference": "both",
+      "experience": "novice",
+      "attendance": 0.87
+    },
+    {
+      "name": "Laura Garcia",
+      "erg_score": 442.5,
+      "side_preference": "port",
+      "experience": "novice",
+      "attendance": 0.89
+    }
+  ]
+}
