@@ -1,50 +1,8 @@
 {
   "rowers": [
     {
-      "name": "Kai",
-      "erg_score": 1348.4,
-      "side_preference": "starboard",
-      "experience": "varsity",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Aiden",
-      "erg_score": 1555.8,
-      "side_preference": "starboard",
-      "experience": "novice",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Ty",
-      "erg_score": 1390.9,
-      "side_preference": "starboard",
-      "experience": "varsity",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Grant",
-      "erg_score": 1291.3,
+      "name": "Ayden C",
+      "erg_score": 1392.5,
       "side_preference": "port",
       "experience": "varsity",
       "attendance_history": [
@@ -57,22 +15,8 @@
       "days_since_boated": 0
     },
     {
-      "name": "Rory",
-      "erg_score": 1306.1,
-      "side_preference": "starboard",
-      "experience": "varsity",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Nathan H",
-      "erg_score": 1401.3,
+      "name": "Noah",
+      "erg_score": 1486.6,
       "side_preference": "both",
       "experience": "varsity",
       "attendance_history": [
@@ -99,51 +43,9 @@
       "days_since_boated": 0
     },
     {
-      "name": "Ayden H",
-      "erg_score": 1548.2,
-      "side_preference": "starboard",
-      "experience": "varsity",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Miguel",
-      "erg_score": 1362.7,
-      "side_preference": "starboard",
-      "experience": "novice",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Noah",
-      "erg_score": 1486.6,
+      "name": "Nathan H",
+      "erg_score": 1401.3,
       "side_preference": "both",
-      "experience": "varsity",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 1
-    },
-    {
-      "name": "Ethan",
-      "erg_score": 1487.5,
-      "side_preference": "port",
       "experience": "varsity",
       "attendance_history": [
         "yes",
@@ -183,10 +85,10 @@
       "days_since_boated": 0
     },
     {
-      "name": "Daniel",
-      "erg_score": 1473.0,
-      "side_preference": "starboard",
-      "experience": "novice",
+      "name": "Mitch",
+      "erg_score": 1391.1,
+      "side_preference": "port",
+      "experience": "varsity",
       "attendance_history": [
         "yes",
         "yes",
@@ -194,13 +96,13 @@
         "yes",
         "yes"
       ],
-      "days_since_boated": 1
+      "days_since_boated": 0
     },
     {
-      "name": "Jack C",
-      "erg_score": 1444.1,
+      "name": "Miguel",
+      "erg_score": 1362.7,
       "side_preference": "starboard",
-      "experience": "varsity",
+      "experience": "novice",
       "attendance_history": [
         "yes",
         "yes",
@@ -225,10 +127,108 @@
       "days_since_boated": 0
     },
     {
+      "name": "Ayden H",
+      "erg_score": 1548.2,
+      "side_preference": "starboard",
+      "experience": "varsity",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Grant",
+      "erg_score": 1291.3,
+      "side_preference": "port",
+      "experience": "varsity",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Kai",
+      "erg_score": 1348.4,
+      "side_preference": "starboard",
+      "experience": "varsity",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Daniel",
+      "erg_score": 1473.0,
+      "side_preference": "starboard",
+      "experience": "novice",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Jack C",
+      "erg_score": 1444.1,
+      "side_preference": "starboard",
+      "experience": "varsity",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 1
+    },
+    {
       "name": "Caleb",
       "erg_score": 1414.3,
       "side_preference": "port",
       "experience": "varsity",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Ty",
+      "erg_score": 1390.9,
+      "side_preference": "starboard",
+      "experience": "varsity",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Emerson",
+      "erg_score": 1298.3,
+      "side_preference": "starboard",
+      "experience": "novice",
       "attendance_history": [
         "yes",
         "yes",
@@ -253,23 +253,9 @@
       "days_since_boated": 0
     },
     {
-      "name": "Mitch",
-      "erg_score": 1391.1,
+      "name": "Casper",
+      "erg_score": 1420.2,
       "side_preference": "port",
-      "experience": "varsity",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Max",
-      "erg_score": 1546.0,
-      "side_preference": "starboard",
       "experience": "novice",
       "attendance_history": [
         "yes",
@@ -281,8 +267,22 @@
       "days_since_boated": 0
     },
     {
-      "name": "Emerson",
-      "erg_score": 1298.3,
+      "name": "Ryan",
+      "erg_score": 1409.6,
+      "side_preference": "starboard",
+      "experience": "varsity",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Will",
+      "erg_score": 1606.2,
       "side_preference": "starboard",
       "experience": "novice",
       "attendance_history": [
@@ -309,23 +309,9 @@
       "days_since_boated": 0
     },
     {
-      "name": "Ryan",
-      "erg_score": 1409.6,
+      "name": "Max",
+      "erg_score": 1546.0,
       "side_preference": "starboard",
-      "experience": "varsity",
-      "attendance_history": [
-        "yes",
-        "yes",
-        "yes",
-        "yes",
-        "yes"
-      ],
-      "days_since_boated": 0
-    },
-    {
-      "name": "Casper",
-      "erg_score": 1420.2,
-      "side_preference": "port",
       "experience": "novice",
       "attendance_history": [
         "yes",
@@ -351,10 +337,24 @@
       "days_since_boated": 0
     },
     {
-      "name": "Will",
-      "erg_score": 1606.2,
+      "name": "Aiden",
+      "erg_score": 1555.8,
       "side_preference": "starboard",
       "experience": "novice",
+      "attendance_history": [
+        "yes",
+        "yes",
+        "yes",
+        "yes",
+        "yes"
+      ],
+      "days_since_boated": 0
+    },
+    {
+      "name": "Ethan",
+      "erg_score": 1487.5,
+      "side_preference": "port",
+      "experience": "varsity",
       "attendance_history": [
         "yes",
         "yes",
@@ -365,9 +365,9 @@
       "days_since_boated": 1
     },
     {
-      "name": "Ayden C",
-      "erg_score": 1392.5,
-      "side_preference": "port",
+      "name": "Rory",
+      "erg_score": 1306.1,
+      "side_preference": "starboard",
       "experience": "varsity",
       "attendance_history": [
         "yes",
@@ -376,7 +376,7 @@
         "yes",
         "yes"
       ],
-      "days_since_boated": 0
+      "days_since_boated": 1
     }
   ]
 }

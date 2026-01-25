@@ -6,28 +6,49 @@ import random
 import math
 from typing import List, Tuple
 from rower import Rower, Boat, Side, Experience
+from optimizer import Optimizer
 
+import yaml
 
-class MultiBoatOptimizer:
+class MultiBoatOptimizer(Optimizer):
     """
     Optimizes multiple boat lineups to be as evenly matched as possible.
     """
 
-    def __init__(self, rowers: List[Rower], boat_type: int,
-                 initial_temp: float = 1000.0,
-                 cooling_rate: float = 0.95,
-                 min_temp: float = 1.0,
-                 iterations_per_temp: int = 100):
-        self.rowers = rowers
+    def __init__(self, rowers: List[Rower], boat_type: int, config: dict = None, scoring_config: dict = None):
+        super().__init__(rowers, scoring_config)
         self.boat_type = boat_type
         self.num_boats = len(rowers) // boat_type
-        self.initial_temp = initial_temp
-        self.cooling_rate = cooling_rate
-        self.min_temp = min_temp
-        self.iterations_per_temp = iterations_per_temp
+        
+        if not config:
+            config = self._load_config()
+
+        self.initial_temp = config.get('initial_temp', 1000.0)
+        self.cooling_rate = config.get('cooling_rate', 0.95)
+        self.min_temp = config.get('min_temp', 1.0)
+        self.iterations_per_temp = config.get('iterations_per_temp', 100)
 
         if self.num_boats == 0:
             raise ValueError(f"Not enough rowers for a single boat of type {boat_type}.")
+
+        self.best_solution = None
+        self.best_cost = float('inf')
+
+    def _load_config(self) -> dict:
+        """Loads configuration from a YAML file."""
+        try:
+            with open('config.yaml', 'r') as f:
+                return yaml.safe_load(f)
+        except (FileNotFoundError, yaml.YAMLError):
+            return {}
+
+    def get_default_scoring_weights(self) -> dict:
+        """Returns default scoring weights for multi-boat optimization."""
+        return {
+            'side_preference_penalty': 100.0,
+            'experience_mixing_penalty': 1000.0,
+            'inter_boat_variance_penalty': 100.0
+        }
 
     def calculate_cost(self, boats: List[List[Rower]]) -> float:
         """
@@ -57,7 +78,7 @@ class MultiBoatOptimizer:
             variance = 0
 
         # Total cost is the sum of individual boat costs plus the variance penalty
-        total_cost = sum(boat_costs) + (variance * 100) # High penalty for imbalance
+        total_cost = sum(boat_costs) + (variance * self.scoring_weights.get('inter_boat_variance_penalty', 100.0))
         return total_cost
 
     def calculate_single_boat_cost(self, lineup: List[Rower]) -> float:
@@ -70,12 +91,25 @@ class MultiBoatOptimizer:
 
         for seat in temp_boat.seats:
             if seat.rower and seat.rower.side_preference != Side.BOTH and seat.rower.side_preference != seat.side:
-                cost += 100.0
+                cost += self.scoring_weights.get('side_preference_penalty', 100.0)
 
         # Experience mix penalty
         varsity_count = sum(1 for r in lineup if r.experience == Experience.VARSITY)
         if varsity_count > 0 and varsity_count < len(lineup):
-            cost += 1000.0  # Penalize mixed boats
+            cost += self.scoring_weights.get('experience_mixing_penalty', 1000.0)  # Penalize mixed boats
+
+        # Power distribution penalty (variance in fitness scores)
+        avg_fitness = sum(r.fitness_score for r in lineup) / len(lineup)
+        variance = sum((r.fitness_score - avg_fitness) ** 2 for r in lineup) / len(lineup)
+        cost += variance * self.scoring_weights.get('power_variance_penalty', 0.1)
+
+        # Stern-loading penalty (pairwise), align with single-boat logic
+        for i in range(len(lineup) - 1):
+            bow_rower = lineup[i]
+            stern_rower = lineup[i + 1]
+            if bow_rower.fitness_score < stern_rower.fitness_score:
+                cost += (stern_rower.fitness_score - bow_rower.fitness_score) * \
+                        self.scoring_weights.get('stern_loading_penalty', 15.0)
 
         return cost
 
@@ -116,8 +150,8 @@ class MultiBoatOptimizer:
         current_solution = initial_solution
         current_cost = self.calculate_cost(current_solution)
         
-        best_solution = current_solution
-        best_cost = current_cost
+        self.best_solution = current_solution
+        self.best_cost = current_cost
         
         temp = self.initial_temp
 
@@ -132,10 +166,45 @@ class MultiBoatOptimizer:
                     current_solution = neighbor
                     current_cost = neighbor_cost
                     
-                    if current_cost < best_cost:
-                        best_solution = current_solution
-                        best_cost = current_cost
+                    if current_cost < self.best_cost:
+                        self.best_solution = current_solution
+                        self.best_cost = current_cost
             
             temp *= self.cooling_rate
             
-        return best_solution, best_cost
+        return self.best_solution, self.best_cost
+
+    def print_results(self):
+        """Print detailed information about multiple lineups."""
+        print("\n" + "="*60)
+        print(f"OPTIMAL MULTI-BOAT LINEUPS (Total Cost: {self.best_cost:.2f})")
+        print("="*60)
+
+        if not self.best_solution:
+            print("No solution found.")
+            print("\n" + "="*60)
+            return
+
+        for i, lineup in enumerate(self.best_solution):
+            boat_obj = Boat(len(lineup))
+            for seat_idx, rower in enumerate(lineup):
+                boat_obj.assign_rower(seat_idx + 1, rower)
+            
+            print(f"\n--- BOAT {i+1} ---")
+            print(boat_obj)
+            
+            active_rowers = [r for r in lineup if r]
+            if active_rowers:
+                avg_erg = sum(r.erg_score for r in active_rowers) / len(active_rowers)
+                minutes = int(avg_erg // 60)
+                seconds = avg_erg % 60
+                print(f"  Average Erg Score: {minutes}:{seconds:05.2f}")
+                
+                avg_attendance = sum(r.attendance_score for r in active_rowers) / len(active_rowers)
+                print(f"  Average Attendance Score: {avg_attendance:.1%}")
+                
+                varsity_count = sum(1 for r in lineup if r and r.experience == Experience.VARSITY)
+                novice_count = sum(1 for r in lineup if r and r.experience == Experience.NOVICE)
+                print(f"  Experience: {varsity_count} Varsity, {novice_count} Novice")
+
+        print("\n" + "="*60)

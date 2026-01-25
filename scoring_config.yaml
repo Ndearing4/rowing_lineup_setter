@@ -1,0 +1,35 @@
+# Configuration for scoring weights in the lineup optimizer
+
+single_boat:
+  # --- Scoring Weights for Single Boat Optimization ---
+  # These values control the importance of different factors in the cost function.
+  # Higher values mean that the factor has a greater influence on the final lineup.
+
+  # Penalty for a rower being on their non-preferred side (port/starboard).
+  side_preference_penalty: 1000.0
+
+  # Penalty for having a mix of varsity and novice rowers in the same boat.
+  # This helps to create more uniform boats in terms of experience.
+  experience_mixing_penalty: 1000.0
+
+  # Penalty for variance in fitness scores within a boat.
+  # A higher value will favor boats with more evenly matched rowers.
+  power_variance_penalty: 0.1
+
+  # Penalty for having a stronger rower (lower fitness score) placed behind a weaker one.
+  # This encourages a "stern-loaded" lineup where power is applied progressively.
+  stern_loading_penalty: 60.0
+
+multi_boat:
+  # --- Scoring Weights for Multi-Boat Optimization ---
+
+  # Penalty for a rower being on their non-preferred side (port/starboard).
+  side_preference_penalty: 100.0
+
+  # Penalty for having a mix of varsity and novice rowers in the same boat.
+  # This is often higher in multi-boat mode to encourage homogenous boats.
+  experience_mixing_penalty: 1000.0
+
+  # Penalty for variance in average fitness scores between boats.
+  # A higher value will favor creating boats that are more evenly matched in terms of overall power.
+  inter_boat_variance_penalty: 100.0

@@ -4,6 +4,7 @@ Command-line interface for the rowing lineup setter.
 
 import json
 import argparse
+import yaml
 from typing import List
 from pathlib import Path
 from rower import Rower, Side, Experience, Boat
@@ -105,7 +106,61 @@ def print_multi_lineup_details(boats: List[List[Rower]], cost: float):
     print("\n" + "="*60)
 
 
+def load_config(path: str) -> dict:
+    """Load configuration from a YAML file."""
+    try:
+        with open(path, 'r') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        return {}
+    except yaml.YAMLError as e:
+        print(f"Error parsing YAML file: {e}")
+        return {}
+
+
+
+def _handle_single_boat_results(best_lineup, best_cost, final_config, rowers):
+    """Create boat, print details, and update rower data for a single boat."""
+    final_boat = Boat(final_config['boat_type'])
+    if best_lineup:
+        for i, rower in enumerate(best_lineup):
+            final_boat.assign_rower(i + 1, rower)
+    
+    print_lineup_details(final_boat, best_cost)
+    
+    if best_lineup:
+        boated_rower_names = {r.name for r in best_lineup}
+        for rower in rowers:
+            if rower.name in boated_rower_names:
+                rower.days_since_boated = 0
+            else:
+                rower.days_since_boated += 1
+    
+    save_rowers_to_json(rowers, final_config['data_file'])
+
+
+def _handle_multi_boat_results(best_lineups, best_cost, final_config, rowers):
+    """Print details and update rower data for multiple boats."""
+    print_multi_lineup_details(best_lineups, best_cost)
+    
+    if best_lineups:
+        boated_rowers = {r.name for lineup in best_lineups for r in lineup}
+        for rower in rowers:
+            if rower.name in boated_rowers:
+                rower.days_since_boated = 0
+            else:
+                rower.days_since_boated += 1
+    
+    save_rowers_to_json(rowers, final_config['data_file'])
+
+
 def main():
+    # Load config from YAML file
+    config_path = 'config.yaml'
+    scoring_config_path = 'scoring_config.yaml'
+    config = load_config(config_path)
+    scoring_config = load_config(scoring_config_path)
+
     parser = argparse.ArgumentParser(
         description='Rowing Lineup Setter - Optimize boat lineups using simulated annealing',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -114,125 +169,79 @@ Examples:
   # Optimize a boat of 8 from rowers.json
   python lineup_setter.py rowers.json --boat-type 8
   
-  # Optimize a boat of 4 with custom parameters
-  python lineup_setter.py rowers.json --boat-type 4 --temp 2000 --cooling 0.9
-  
   # Run multiple optimizations to find best result
   python lineup_setter.py rowers.json --boat-type 8 --runs 5
+
+  # Create multiple balanced boats
+  python lineup_setter.py rowers.json --multi-boat
         """
     )
     
-    parser.add_argument('data_file', type=str,
-                       help='JSON file containing rower data')
-    parser.add_argument('--boat-type', type=int, choices=[4, 8], default=8,
-                       help='Type of boat: 4 for fours, 8 for eights (default: 8)')
-    parser.add_argument('--temp', type=float, default=1000.0,
-                       help='Initial temperature for simulated annealing (default: 1000.0)')
-    parser.add_argument('--cooling', type=float, default=0.95,
-                       help='Cooling rate (default: 0.95)')
-    parser.add_argument('--min-temp', type=float, default=1.0,
-                       help='Minimum temperature (default: 1.0)')
-    parser.add_argument('--iterations', type=int, default=100,
-                       help='Iterations per temperature (default: 100)')
-    parser.add_argument('--runs', type=int, default=1,
-                       help='Number of optimization runs (returns best) (default: 1)')
+    parser.add_argument('data_file', type=str, nargs='?', default=config.get('rower_data_file'),
+                       help='JSON file containing rower data (overrides config.yaml)')
+    parser.add_argument('--boat-type', type=int, choices=[4, 8],
+                       help=f'Type of boat: 4 or 8 (default from config: {config.get("boat_type")})')
+    parser.add_argument('--runs', type=int, default=config.get('runs', 1),
+                       help='Number of optimization runs (returns best) (default from config: 1)')
     parser.add_argument('--multi-boat', action='store_true',
                        help='Create multiple balanced boats instead of a single optimal one.')
     parser.add_argument('--convert-6k', action='store_true',
                        help='Convert 6k erg scores to estimated 2k scores.')
     
     args = parser.parse_args()
+
+    # Combine YAML config and CLI args
+    final_config = config.copy()
+    cli_args = {k: v for k, v in vars(args).items() if v is not None}
+    final_config.update(cli_args)
     
+    if not final_config.get('data_file'):
+        parser.error("the following arguments are required: data_file (or set 'rower_data_file' in config.yaml)")
+
     # Load rowers from the specified data file
-    rowers = load_rowers_from_json(args.data_file, convert_6k=args.convert_6k)
+    rowers = load_rowers_from_json(final_config['data_file'], convert_6k=final_config.get('convert_6k', False))
     
-    if args.multi_boat:
-        num_boats = len(rowers) // args.boat_type
+    # Determine which optimizer to use
+    if final_config.get('multi_boat'):
+        optimizer_class = MultiBoatOptimizer
+        num_boats = len(rowers) // final_config['boat_type']
         if num_boats == 0:
             print("Not enough rowers to create any boats.")
             return
-
-        print(f"Optimizing for {num_boats} boats of {args.boat_type}...")
-        
-        best_lineups = None
-        best_cost = float('inf')
-
-        runs = args.runs if args.runs > 1 else 1
-        for i in range(runs):
-
-            optimizer = MultiBoatOptimizer(
-                rowers=rowers,
-                boat_type=args.boat_type,
-                initial_temp=args.temp,
-                cooling_rate=args.cooling
-            )
-            
-            current_lineups, current_cost = optimizer.optimize()
-
-            if runs > 1:
-                print(f"--- Running multi-boat optimization {i+1}/{runs} Cost: {current_cost} ---")
-
-            if current_cost < best_cost:
-                best_lineups = current_lineups
-                best_cost = current_cost
-
-        print_multi_lineup_details(best_lineups, best_cost)
-        
-        # Update days_since_boated for all rowers
-        if best_lineups:
-            boated_rowers = {r.name for lineup in best_lineups for r in lineup}
-            for rower in rowers:
-                if rower.name in boated_rowers:
-                    rower.days_since_boated = 0
-                else:
-                    rower.days_since_boated += 1
-        
-        save_rowers_to_json(rowers, args.data_file)
-
+        print(f"Optimizing for {num_boats} boats of {final_config['boat_type']}...")
     else:
-        best_lineup = None
-        best_cost = float('inf')
-        
-        runs = args.runs if args.runs > 1 else 1
-        
-        for i in range(runs):   
-            optimizer = LineupOptimizer(
-                rowers=rowers,
-                boat_type=args.boat_type,
-                initial_temp=args.temp,
-                cooling_rate=args.cooling,
-                min_temp=1.0,
-                iterations_per_temp=100
-            )
-            
-            current_lineup, current_cost = optimizer.optimize()
-            
-            if runs > 1:
-                print(f"--- Running multi-boat optimization {i+1}/{runs} Cost: {current_cost} ---")
+        optimizer_class = LineupOptimizer
 
-            if current_cost < best_cost:
-                best_lineup = current_lineup
-                best_cost = current_cost
+    best_result = None
+    best_cost = float('inf')
+    
+    runs = final_config.get('runs', 1)
+    
+    for i in range(runs):
+        optimizer = optimizer_class(
+            rowers=rowers,
+            boat_type=final_config['boat_type'],
+            config=final_config,
+            scoring_config=scoring_config
+        )
         
-        # Create a boat and print details
-        final_boat = Boat(args.boat_type)
-        if best_lineup:
-            for i, rower in enumerate(best_lineup):
-                final_boat.assign_rower(i + 1, rower)
-            
-        print_lineup_details(final_boat, best_cost)
+        current_result, current_cost = optimizer.optimize()
         
-        # Update days_since_boated for all rowers
-        if best_lineup:
-            boated_rower_names = {r.name for r in best_lineup}
-            for rower in rowers:
-                if rower.name in boated_rower_names:
-                    rower.days_since_boated = 0
-                else:
-                    rower.days_since_boated += 1
-                    
-        # Save updated rower data
-        save_rowers_to_json(rowers, args.data_file)
+        if runs > 1:
+            print(f"--- Running optimization {i+1}/{runs} Cost: {current_cost} ---")
+
+        if current_cost < best_cost:
+            best_result = current_result
+            best_cost = current_cost
+    
+    # Handle results
+
+    optimizer.print_results()
+
+    # if final_config.get('multi_boat'):
+    #     _handle_multi_boat_results(best_result, best_cost, final_config, rowers)
+    # else:
+    #     _handle_single_boat_results(best_result, best_cost, final_config, rowers)
 
 
 if __name__ == "__main__":
