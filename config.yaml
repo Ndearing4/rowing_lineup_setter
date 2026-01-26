@@ -1,0 +1,11 @@
+boat_type: 8
+convert_6k: 0
+cooling_rate: 0.95
+cooling_schedule: exponential
+erg_score_file: erg_scores_01-06-26.csv
+initial_temp: 1000.0
+iterations_per_temp: 100
+min_temp: 1.0
+multi_boat: true
+rower_data_file: sample_rowers.json
+runs: 1

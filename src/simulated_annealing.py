@@ -53,11 +53,11 @@ class LineupOptimizer(Optimizer):
         """Returns default scoring weights."""
         print("Using default scoring weights for LineupOptimizer.")
         return {
-            'side_preference_penalty': 100.0,
-            'experience_mixing_penalty': 10.0,
+            'days_since_boated_penalty': 5.0,
+            'experience_mixing_penalty': 1000.0,
             'power_variance_penalty': 0.1,
-            'stern_loading_penalty': 15.0,
-            'days_since_boated_penalty': 5.0
+            'side_preference_penalty': 1000.0,
+            'stern_loading_penalty': 60.0
         }
     
     def calculate_cost(self, lineup: List[Rower]) -> float:
@@ -67,7 +67,7 @@ class LineupOptimizer(Optimizer):
         Considers:
         - Erg scores (faster is better)
         - Side preferences (matching preference is better)
-        - Attendance (higher is better)
+        # - Attendance (removed)
         - Balance between port and starboard
         """
         if len(lineup) != self.boat_type:
@@ -79,7 +79,7 @@ class LineupOptimizer(Optimizer):
         
         cost = 0.0
         
-        # Cost component 1: Total fitness (erg/attendance)
+        # Cost component 1: Total fitness (erg only)
         for rower in lineup:
             cost += rower.fitness_score
         
@@ -90,7 +90,7 @@ class LineupOptimizer(Optimizer):
                 if seat.rower.side_preference != Side.BOTH:
                     if seat.rower.side_preference != seat.side:
                         # Penalty for being on non-preferred side
-                        side_penalty += self.scoring_weights.get('side_preference_penalty', 100.0)
+                        side_penalty += self.scoring_weights.get('side_preference_penalty', 1000.0)
         cost += side_penalty
         
         # Cost component 3: Experience clustering
@@ -102,7 +102,7 @@ class LineupOptimizer(Optimizer):
         # Penalize mixed-experience boats. The penalty is lowest when one group is 0.
         # The penalty is highest when the boat is evenly split.
         experience_mixing_penalty = varsity_count * novice_count
-        cost += experience_mixing_penalty * self.scoring_weights.get('experience_mixing_penalty', 10.0)
+        cost += experience_mixing_penalty * self.scoring_weights.get('experience_mixing_penalty', 1000.0)
         
         # Cost component 4: Power distribution
         # Calculate variance in fitness scores (prefer balanced power)
@@ -119,7 +119,7 @@ class LineupOptimizer(Optimizer):
             if bow_rower.fitness_score < stern_rower.fitness_score:
                 # The rower towards the bow is stronger than the one towards the stern, which is undesirable.
                 # The penalty is proportional to the difference.
-                cost += (stern_rower.fitness_score - bow_rower.fitness_score) * self.scoring_weights.get('stern_loading_penalty', 15.0)
+                cost += (stern_rower.fitness_score - bow_rower.fitness_score) * self.scoring_weights.get('stern_loading_penalty', 60.0)
         
         return cost
     
@@ -229,9 +229,6 @@ class LineupOptimizer(Optimizer):
             minutes = int(avg_erg // 60)
             seconds = avg_erg % 60
             print(f"Average Erg Score: {minutes}:{seconds:05.2f}")
-        
-            avg_attendance = sum(r.attendance_score for r in active_rowers) / len(active_rowers)
-            print(f"Average Attendance Score: {avg_attendance:.1%}")
         else:
             print("No rowers in lineup")
         

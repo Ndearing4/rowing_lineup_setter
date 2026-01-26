@@ -39,6 +39,7 @@ def convert_6k_to_2k(time_6k: float) -> float:
     return time_2k_estimated
 
 
+
 @dataclass
 class Rower:
     """Represents a rower with their attributes"""
@@ -46,8 +47,8 @@ class Rower:
     erg_score: float  # 2k erg time in seconds
     side_preference: Side
     experience: Experience
-    attendance_history: List[str]  # List of "yes" or "no"
     days_since_boated: int
+    present_today: bool = True
 
     def __post_init__(self):
         if isinstance(self.side_preference, str):
@@ -56,27 +57,14 @@ class Rower:
             self.experience = Experience(self.experience)
 
     @property
-    def attendance_score(self) -> float:
-        """Calculates an attendance score. Higher is better."""
-        if not self.attendance_history:
-            return 0.0
-        return self.attendance_history.count("yes") / len(self.attendance_history)
-
-    @property
     def fitness_score(self) -> float:
         """Calculate a fitness score for the rower (lower is better)"""
         # Base score on erg time
         score = self.erg_score
-
-        # Add a penalty if the rower was absent yesterday.
-        if self.attendance_history and self.attendance_history[-1] == "no":
-            score += 500.0  # Significant penalty for missing practice
-
         # Adjust score based on how long it's been since they were boated.
         # Add a bonus for each day they've waited.
         # The larger the days_since_boated, the more we reduce the score.
         score -= self.days_since_boated * 5  # 5 seconds bonus per day waited
-
         return score
 
     def to_dict(self) -> dict:
@@ -86,8 +74,8 @@ class Rower:
             'erg_score': self.erg_score,
             'side_preference': self.side_preference.value,
             'experience': self.experience.value,
-            'attendance_history': self.attendance_history,
-            'days_since_boated': self.days_since_boated
+            'days_since_boated': self.days_since_boated,
+            'present_today': self.present_today
         }
 
     @classmethod
@@ -96,14 +84,13 @@ class Rower:
         erg_score = data['erg_score']
         if convert_6k:
             erg_score = convert_6k_to_2k(erg_score)
-        
         return cls(
             name=data['name'],
             erg_score=erg_score,
             side_preference=Side(data['side_preference']),
             experience=Experience(data['experience']),
-            attendance_history=data['attendance_history'],
-            days_since_boated=data['days_since_boated']
+            days_since_boated=data['days_since_boated'],
+            present_today=data.get('present_today', True)
         )
 
 

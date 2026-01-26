@@ -43,10 +43,13 @@ class MultiBoatOptimizer(Optimizer):
             return {}
 
     def get_default_scoring_weights(self) -> dict:
-        """Returns default scoring weights for multi-boat optimization."""
+        """Returns default scoring weights for multi-boat optimization (inherits single-boat params)."""
         return {
-            'side_preference_penalty': 100.0,
+            'days_since_boated_penalty': 5.0,
             'experience_mixing_penalty': 1000.0,
+            'power_variance_penalty': 0.1,
+            'side_preference_penalty': 1000.0,
+            'stern_loading_penalty': 60.0,
             'inter_boat_variance_penalty': 100.0
         }
 
@@ -84,21 +87,21 @@ class MultiBoatOptimizer(Optimizer):
     def calculate_single_boat_cost(self, lineup: List[Rower]) -> float:
         """Calculates the cost for a single boat."""
         cost = 0.0
-        # Side preference mismatch penalty
+        # Side preference mismatch penalty (from single_boat)
         temp_boat = Boat(self.boat_type)
         for i, rower in enumerate(lineup):
             temp_boat.assign_rower(i + 1, rower)
 
         for seat in temp_boat.seats:
             if seat.rower and seat.rower.side_preference != Side.BOTH and seat.rower.side_preference != seat.side:
-                cost += self.scoring_weights.get('side_preference_penalty', 100.0)
+                cost += self.scoring_weights.get('side_preference_penalty', 1000.0)
 
-        # Experience mix penalty
+        # Experience mix penalty (from single_boat)
         varsity_count = sum(1 for r in lineup if r.experience == Experience.VARSITY)
         if varsity_count > 0 and varsity_count < len(lineup):
             cost += self.scoring_weights.get('experience_mixing_penalty', 1000.0)  # Penalize mixed boats
 
-        # Power distribution penalty (variance in fitness scores)
+        # Power distribution penalty (variance in fitness scores) (from single_boat)
         avg_fitness = sum(r.fitness_score for r in lineup) / len(lineup)
         variance = sum((r.fitness_score - avg_fitness) ** 2 for r in lineup) / len(lineup)
         cost += variance * self.scoring_weights.get('power_variance_penalty', 0.1)
@@ -109,7 +112,10 @@ class MultiBoatOptimizer(Optimizer):
             stern_rower = lineup[i + 1]
             if bow_rower.fitness_score < stern_rower.fitness_score:
                 cost += (stern_rower.fitness_score - bow_rower.fitness_score) * \
-                        self.scoring_weights.get('stern_loading_penalty', 15.0)
+                        self.scoring_weights.get('stern_loading_penalty', 60.0)
+
+        # Days since boated penalty (from single_boat)
+        cost += sum(self.scoring_weights.get('days_since_boated_penalty', 5.0) for r in lineup)  # if needed
 
         return cost
 
@@ -200,8 +206,7 @@ class MultiBoatOptimizer(Optimizer):
                 seconds = avg_erg % 60
                 print(f"  Average Erg Score: {minutes}:{seconds:05.2f}")
                 
-                avg_attendance = sum(r.attendance_score for r in active_rowers) / len(active_rowers)
-                print(f"  Average Attendance Score: {avg_attendance:.1%}")
+                # Attendance reporting removed
                 
                 varsity_count = sum(1 for r in lineup if r and r.experience == Experience.VARSITY)
                 novice_count = sum(1 for r in lineup if r and r.experience == Experience.NOVICE)

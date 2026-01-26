@@ -53,10 +53,6 @@ def print_lineup_details(boat, cost: float):
         minutes = int(avg_erg // 60)
         seconds = avg_erg % 60
         print(f"Average Erg Score: {minutes}:{seconds:05.2f}")
-    
-        # Average attendance
-        avg_attendance = sum(r.attendance_score for r in active_rowers) / len(active_rowers)
-        print(f"Average Attendance Score: {avg_attendance:.1%}")
     else:
         print("No rowers in lineup")
     
@@ -209,8 +205,14 @@ Examples:
             print("Not enough rowers to create any boats.")
             return
         print(f"Optimizing for {num_boats} boats of {final_config['boat_type']}...")
+        # For multi-boat, use all single_boat params plus inter_boat_variance_penalty
+        mb_scoring = dict(scoring_config.get('single_boat', {}))
+        if 'inter_boat_variance_penalty' in scoring_config.get('multi_boat', {}):
+            mb_scoring['inter_boat_variance_penalty'] = scoring_config['multi_boat']['inter_boat_variance_penalty']
+        scoring_config_to_use = mb_scoring
     else:
         optimizer_class = LineupOptimizer
+        scoring_config_to_use = scoring_config.get('single_boat', {})
 
     best_result = None
     best_cost = float('inf')
@@ -222,14 +224,11 @@ Examples:
             rowers=rowers,
             boat_type=final_config['boat_type'],
             config=final_config,
-            scoring_config=scoring_config
+            scoring_config=scoring_config_to_use
         )
-        
         current_result, current_cost = optimizer.optimize()
-        
         if runs > 1:
             print(f"--- Running optimization {i+1}/{runs} Cost: {current_cost} ---")
-
         if current_cost < best_cost:
             best_result = current_result
             best_cost = current_cost
